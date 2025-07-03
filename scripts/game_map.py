@@ -7,4 +7,4 @@ class GameMap:
         # Verificar obstáculos
     
     def render(self, screen):
-        # Dibujar mapa
+        
