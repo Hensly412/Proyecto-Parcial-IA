@@ -10,7 +10,7 @@ from scripts.game import Game
 from scripts.menu import Menu
 from scripts.config import Config
 
-ef main():
+def main():
     """
     Función principal del juego HV Warriors
     """
