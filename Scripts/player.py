@@ -50,6 +50,9 @@ class Player:
         """
         # Usar skin manager si está disponible
         if self.skin_manager:
+            # Actualizar current_skin_name ANTES de cargar
+            self.current_skin_name = self.skin_manager.current_player_skin
+            
             new_sprite = self.skin_manager.get_player_skin()
             if new_sprite:
                 self.sprite = new_sprite
@@ -197,17 +200,28 @@ class Player:
         """
         Renderiza al jugador en la pantalla
         """
-        # Verificar skin antes de renderizar (fuerza actualización)
+        # VERIFICACIÓN AGRESIVA: Comprobar skin antes de cada render
         if self.skin_manager:
-            self.sprite = self.skin_manager.get_player_skin()
+            current_skin_name = self.skin_manager.current_player_skin
+            if current_skin_name != self.current_skin_name:
+                print(f"🔄 RENDER: Detectado cambio de skin {self.current_skin_name} → {current_skin_name}")
+                self.current_skin_name = current_skin_name
+                new_sprite = self.skin_manager.get_player_skin()
+                if new_sprite:
+                    self.sprite = new_sprite
+                    print(f"✅ RENDER: Sprite actualizado a {current_skin_name}")
         
         # Rotar sprite según la dirección
-        rotated_sprite = pygame.transform.rotate(self.sprite, -self.facing_direction * 90)
-        
-        # Centrar el sprite rotado
-        sprite_rect = rotated_sprite.get_rect(center=self.rect.center)
-        
-        screen.blit(rotated_sprite, sprite_rect)
+        if self.sprite:
+            rotated_sprite = pygame.transform.rotate(self.sprite, -self.facing_direction * 90)
+            
+            # Centrar el sprite rotado
+            sprite_rect = rotated_sprite.get_rect(center=self.rect.center)
+            
+            screen.blit(rotated_sprite, sprite_rect)
+        else:
+            # Fallback: dibujar rectángulo
+            pygame.draw.rect(screen, Config.BLUE, self.rect)
         
         # Renderizar indicador de salud si está herido
         if self.health < self.max_health:
