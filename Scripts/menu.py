@@ -10,9 +10,22 @@ class Menu:
     Clase del menú principal
     """
     
-    def __init__(self, screen):
+    def __init__(self, screen, skin_manager=None):
         self.screen = screen
+        self.skin_manager = skin_manager
         self.selected_option = 0
+        self.options = ["Start Game", "Select Skin", "Quit"]
+        
+        # Fuentes
+        self.title_font = pygame.font.Font(None, 72)
+        self.option_font = pygame.font.Font(None, 48)
+        self.info_font = pygame.font.Font(None, 24)
+        
+        # Gamepad
+        self.gamepad = None
+        if pygame.joystick.get_count() > 0:
+            self.gamepad = pygame.joystick.Joystick(0)
+            self.gamepad.init()selected_option = 0
         self.options = ["Start Game", "Quit"]
         
         # Fuentes
@@ -39,6 +52,8 @@ class Menu:
                 if self.selected_option == 0:
                     return "START"
                 elif self.selected_option == 1:
+                    return "SKINS"
+                elif self.selected_option == 2:
                     return "QUIT"
         
         elif event.type == pygame.JOYBUTTONDOWN:
@@ -47,6 +62,8 @@ class Menu:
                     if self.selected_option == 0:
                         return "START"
                     elif self.selected_option == 1:
+                        return "SKINS"
+                    elif self.selected_option == 2:
                         return "QUIT"
         
         elif event.type == pygame.JOYHATMOTION:

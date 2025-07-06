@@ -12,6 +12,7 @@ from scripts.bullet import Bullet
 from scripts.game_map import GameMap
 from scripts.sound_manager import SoundManager
 from scripts.sprite_manager import SpriteManager
+from scripts.skin_manager import SkinManager
 
 class Game:
     """
@@ -29,12 +30,13 @@ class Game:
         # Inicializar componentes
         self.sound_manager = SoundManager()
         self.sprite_manager = SpriteManager()
+        self.skin_manager = SkinManager()
         self.game_map = GameMap()
         
         # Crear jugador
         start_x = Config.SCREEN_WIDTH // 2
         start_y = Config.SCREEN_HEIGHT - 100
-        self.player = Player(start_x, start_y, self.sprite_manager)
+        self.player = Player(start_x, start_y, self.sprite_manager, self.skin_manager)
         
         # Listas de entidades
         self.enemies = []
@@ -188,7 +190,7 @@ class Game:
             x = -Config.ENEMY_SIZE
             y = random.randint(0, Config.SCREEN_HEIGHT)
         
-        enemy = Enemy(x, y, self.sprite_manager)
+        enemy = Enemy(x, y, self.sprite_manager, self.skin_manager)
         self.enemies.append(enemy)
     
     def check_collisions(self):
@@ -268,6 +270,16 @@ class Game:
         # Enemigos eliminados
         kills_text = font.render(f"Kills: {self.enemies_killed}", True, Config.WHITE)
         self.screen.blit(kills_text, (10, 130))
+        
+        # Información de música
+        current_track = self.sound_manager.get_current_track_name()
+        music_text = font.render(f"Música: {current_track}", True, Config.WHITE)
+        self.screen.blit(music_text, (10, 170))
+        
+        # Skin actual
+        current_skin = self.skin_manager.current_player_skin
+        skin_text = font.render(f"Skin: {current_skin}", True, Config.WHITE)
+        self.screen.blit(skin_text, (10, 210))
         
         # Barra de salud visual
         health_bar_width = 200
