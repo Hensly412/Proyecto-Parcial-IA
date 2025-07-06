@@ -16,14 +16,29 @@ class SkinManager:
         self.enemy_skins = {}
         self.current_player_skin = "default"
         self.current_enemy_skin = "default"
+        
+        print("🎨 Inicializando SkinManager...")
         self.load_all_skins()
+        print(f"🎨 SkinManager inicializado. Skins cargadas: {list(self.player_skins.keys())}")
+        print(f"🎨 Skin inicial: {self.current_player_skin}")
     
     def load_all_skins(self):
         """
         Carga todas las skins disponibles
         """
+        print("🎨 Cargando skins...")
         self.load_player_skins()
         self.load_enemy_skins()
+        
+        # Asegurar que current_player_skin sea válida
+        if self.current_player_skin not in self.player_skins:
+            if "default" in self.player_skins:
+                self.current_player_skin = "default"
+            else:
+                # Usar la primera skin disponible
+                self.current_player_skin = list(self.player_skins.keys())[0]
+        
+        print(f"✅ Skins cargadas. Current skin asegurada: {self.current_player_skin}")
     
     def load_player_skins(self):
         """
@@ -75,30 +90,50 @@ class SkinManager:
         """
         sprite = pygame.Surface((Config.PLAYER_SIZE, Config.PLAYER_SIZE), pygame.SRCALPHA)
         
-        # Cuerpo principal
+        # Cuerpo principal (más visible)
         pygame.draw.circle(sprite, main_color, 
                          (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//2), 
                          Config.PLAYER_SIZE//2 - 2)
         
-        # Cabeza/casco
+        # Cabeza/casco (más grande)
         pygame.draw.circle(sprite, detail_color, 
-                         (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 6)
+                         (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 8)
         
-        # Arma
-        weapon_rect = pygame.Rect(Config.PLAYER_SIZE//2 - 3, 
-                                Config.PLAYER_SIZE//2 - 2, 6, 12)
+        # Arma (más visible)
+        weapon_rect = pygame.Rect(Config.PLAYER_SIZE//2 - 4, 
+                                Config.PLAYER_SIZE//2 - 2, 8, 16)
         pygame.draw.rect(sprite, weapon_color, weapon_rect)
         
-        # Detalles adicionales
+        # Detalles adicionales (más distintivos)
         pygame.draw.circle(sprite, detail_color, 
-                         (Config.PLAYER_SIZE//2 - 6, Config.PLAYER_SIZE//2), 2)
+                         (Config.PLAYER_SIZE//2 - 8, Config.PLAYER_SIZE//2), 3)
         pygame.draw.circle(sprite, detail_color, 
-                         (Config.PLAYER_SIZE//2 + 6, Config.PLAYER_SIZE//2), 2)
+                         (Config.PLAYER_SIZE//2 + 8, Config.PLAYER_SIZE//2), 3)
         
-        # Borde
+        # Agregar patrón único según colores
+        if main_color == (255, 69, 0):  # Fire skin
+            # Agregar llamas
+            pygame.draw.polygon(sprite, (255, 140, 0), [
+                (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4),
+                (Config.PLAYER_SIZE//2 - 4, Config.PLAYER_SIZE//4 + 6),
+                (Config.PLAYER_SIZE//2 + 4, Config.PLAYER_SIZE//4 + 6)
+            ])
+        elif main_color == (34, 139, 34):  # Nature skin
+            # Agregar hojas
+            pygame.draw.ellipse(sprite, (154, 205, 50), 
+                              (Config.PLAYER_SIZE//2 - 6, Config.PLAYER_SIZE//4 - 2, 4, 8))
+            pygame.draw.ellipse(sprite, (154, 205, 50), 
+                              (Config.PLAYER_SIZE//2 + 2, Config.PLAYER_SIZE//4 - 2, 4, 8))
+        elif main_color == (255, 215, 0):  # Golden skin
+            # Agregar brillo
+            for i in range(3):
+                pygame.draw.circle(sprite, (255, 255, 255), 
+                                 (Config.PLAYER_SIZE//2 + i*3, Config.PLAYER_SIZE//2 + i*3), 1)
+        
+        # Borde distintivo
         pygame.draw.circle(sprite, Config.BLACK, 
                          (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//2), 
-                         Config.PLAYER_SIZE//2 - 2, 2)
+                         Config.PLAYER_SIZE//2 - 2, 3)
         
         return sprite
     

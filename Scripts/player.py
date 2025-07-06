@@ -19,6 +19,9 @@ class Player:
         self.skin_manager = skin_manager
         self.rect = pygame.Rect(x, y, Config.PLAYER_SIZE, Config.PLAYER_SIZE)
         
+        # Rastrear skin actual para detectar cambios
+        self.current_skin_name = None
+        
         # Estadísticas
         self.health = Config.PLAYER_HEALTH
         self.max_health = Config.PLAYER_HEALTH
@@ -47,17 +50,30 @@ class Player:
         """
         # Usar skin manager si está disponible
         if self.skin_manager:
-            self.sprite = self.skin_manager.get_player_skin()
+            new_sprite = self.skin_manager.get_player_skin()
+            if new_sprite:
+                self.sprite = new_sprite
+                print(f"🎨 Sprite cargado desde SkinManager: {self.skin_manager.current_player_skin}")
+            else:
+                print("❌ SkinManager no devolvió sprite")
+                self.create_fallback_sprite()
         else:
-            # Crear sprite básico si no hay skin manager
-            self.sprite = pygame.Surface((Config.PLAYER_SIZE, Config.PLAYER_SIZE))
-            self.sprite.fill(Config.BLUE)
-            
-            # Agregar detalles al sprite
-            pygame.draw.circle(self.sprite, Config.WHITE, 
-                             (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 4)
-            pygame.draw.rect(self.sprite, Config.YELLOW,
-                            (Config.PLAYER_SIZE//2 - 2, Config.PLAYER_SIZE//2, 4, 8))
+            print("❌ No hay SkinManager disponible")
+            self.create_fallback_sprite()
+    
+    def create_fallback_sprite(self):
+        """
+        Crea sprite básico de respaldo
+        """
+        self.sprite = pygame.Surface((Config.PLAYER_SIZE, Config.PLAYER_SIZE))
+        self.sprite.fill(Config.BLUE)
+        
+        # Agregar detalles al sprite
+        pygame.draw.circle(self.sprite, Config.WHITE, 
+                         (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 4)
+        pygame.draw.rect(self.sprite, Config.YELLOW,
+                        (Config.PLAYER_SIZE//2 - 2, Config.PLAYER_SIZE//2, 4, 8))
+        print("🎨 Sprite de respaldo creado")
     
     def update_skin(self):
         """
@@ -69,6 +85,15 @@ class Player:
         """
         Actualiza el estado del jugador
         """
+        # Verificar cambios de skin (DETECCIÓN MEJORADA)
+        if self.skin_manager:
+            current_skin_name = self.skin_manager.current_player_skin
+            if current_skin_name != self.current_skin_name:
+                print(f"🎨 CAMBIANDO SKIN EN PLAYER: {self.current_skin_name} → {current_skin_name}")
+                self.current_skin_name = current_skin_name
+                self.load_sprite()
+                print(f"🎨 Sprite actualizado para skin: {current_skin_name}")
+        
         # Actualizar cooldown de disparo
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= dt
@@ -172,6 +197,10 @@ class Player:
         """
         Renderiza al jugador en la pantalla
         """
+        # Verificar skin antes de renderizar (fuerza actualización)
+        if self.skin_manager:
+            self.sprite = self.skin_manager.get_player_skin()
+        
         # Rotar sprite según la dirección
         rotated_sprite = pygame.transform.rotate(self.sprite, -self.facing_direction * 90)
         
