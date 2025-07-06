@@ -28,9 +28,11 @@ class Menu:
             self.gamepad = pygame.joystick.Joystick(0)
             self.gamepad.init()
         
-        # Reproducir música del menú
-        if self.sound_manager:
+        # Reproducir música del menú (con verificación)
+        if self.sound_manager and hasattr(self.sound_manager, 'play_menu_music'):
             self.sound_manager.play_menu_music()
+        elif self.sound_manager:
+            print("⚠️ SoundManager no tiene método play_menu_music()")
     
     def handle_event(self, event):
         """
