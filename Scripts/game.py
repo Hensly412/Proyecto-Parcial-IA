@@ -1,10 +1,11 @@
-# Lógica principal del juego HV Warriors
+# Lógica principal del juego HV Warriors (CON IMAGEN DE FONDO)
 # Autor: Hensly Manuel Vidal Rosario
 # Matrícula: 23-MISN-2-007
 
 import pygame
 import random
 import math
+import os
 from scripts.config import Config
 from scripts.player import Player
 from scripts.enemy import Enemy
@@ -15,7 +16,7 @@ from scripts.sprite_manager import SpriteManager
 
 class Game:
     """
-    Clase principal que maneja la lógica del juego
+    Clase principal que maneja la lógica del juego con fondo de imagen
     """
     
     def __init__(self, screen):
@@ -30,6 +31,12 @@ class Game:
         self.sound_manager = SoundManager()
         self.sprite_manager = SpriteManager()
         self.game_map = GameMap()
+        
+        # Cargar imagen de fondo
+        self.background = None
+        self.background_offset_x = 0
+        self.background_offset_y = 0
+        self.load_background()
         
         print(f"🎮 Game: Componentes inicializados")
         
@@ -58,11 +65,49 @@ class Game:
         # Reproducir música del juego
         self.sound_manager.play_game_music()
     
-    def debug_skins(self):
+    def load_background(self):
         """
-        Método de debug eliminado (ya no hay skins)
+        Carga la imagen de fondo del juego
         """
-        pass
+        try:
+            background_path = os.path.join("assets", "images", "game_background.jpg")
+            if os.path.exists(background_path):
+                self.background = pygame.image.load(background_path)
+                # Hacer la imagen más grande para efecto parallax
+                bg_width = int(Config.SCREEN_WIDTH * 1.5)
+                bg_height = int(Config.SCREEN_HEIGHT * 1.5)
+                self.background = pygame.transform.scale(self.background, (bg_width, bg_height))
+                print("✓ Imagen de fondo del juego cargada")
+            else:
+                print("✗ No se encontró game_background.jpg")
+                self.create_default_background()
+        except Exception as e:
+            print(f"✗ Error cargando imagen de fondo: {e}")
+            self.create_default_background()
+    
+    def create_default_background(self):
+        """
+        Crea un fondo por defecto con patrón de terreno
+        """
+        width = int(Config.SCREEN_WIDTH * 1.5)
+        height = int(Config.SCREEN_HEIGHT * 1.5)
+        self.background = pygame.Surface((width, height))
+        
+        # Color base terroso
+        self.background.fill((101, 67, 33))
+        
+        # Añadir textura
+        for y in range(0, height, 40):
+            for x in range(0, width, 40):
+                if (x + y) % 80 == 0:
+                    pygame.draw.rect(self.background, (80, 50, 20), (x, y, 40, 40))
+        
+        # Añadir algunos detalles
+        for i in range(50):
+            x = random.randint(0, width)
+            y = random.randint(0, height)
+            radius = random.randint(20, 40)
+            pygame.draw.circle(self.background, (80, 50, 20), (x, y), radius)
     
     def handle_event(self, event):
         """
@@ -89,6 +134,9 @@ class Game:
         
         # Actualizar controles del jugador
         self.update_player_input(dt)
+        
+        # Actualizar efecto parallax del fondo
+        self.update_background_parallax()
         
         # Actualizar entidades
         self.player.update(dt)
@@ -133,6 +181,21 @@ class Game:
             self.wave_timer = 0
         
         return None
+    
+    def update_background_parallax(self):
+        """
+        Actualiza el efecto parallax del fondo basado en la posición del jugador
+        """
+        if self.background:
+            # Calcular offset basado en la posición del jugador
+            player_x_ratio = self.player.rect.centerx / Config.SCREEN_WIDTH
+            player_y_ratio = self.player.rect.centery / Config.SCREEN_HEIGHT
+            
+            max_offset_x = self.background.get_width() - Config.SCREEN_WIDTH
+            max_offset_y = self.background.get_height() - Config.SCREEN_HEIGHT
+            
+            self.background_offset_x = int(player_x_ratio * max_offset_x * 0.3)  # 0.3 para efecto suave
+            self.background_offset_y = int(player_y_ratio * max_offset_y * 0.3)
     
     def update_player_input(self, dt):
         """
@@ -243,10 +306,19 @@ class Game:
         """
         Renderiza todos los elementos del juego
         """
-        # Limpiar pantalla
-        self.screen.fill(Config.DARK_GREEN)
+        # Dibujar imagen de fondo con efecto parallax
+        if self.background:
+            self.screen.blit(self.background, (-self.background_offset_x, -self.background_offset_y))
+        else:
+            self.screen.fill(Config.DARK_GREEN)
         
-        # Renderizar mapa
+        # Overlay semi-transparente para el mapa
+        map_overlay = pygame.Surface((Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
+        map_overlay.set_alpha(100)  # Muy transparente
+        map_overlay.fill(Config.BLACK)
+        self.screen.blit(map_overlay, (0, 0))
+        
+        # Renderizar mapa con transparencia
         self.game_map.render(self.screen)
         
         # Renderizar entidades
@@ -266,47 +338,71 @@ class Game:
     
     def render_ui(self):
         """
-        Renderiza la interfaz de usuario
+        Renderiza la interfaz de usuario con mejor diseño
         """
         font = pygame.font.Font(None, 36)
+        font_small = pygame.font.Font(None, 24)
         
-        # Salud del jugador
+        # Panel de información con fondo semi-transparente
+        panel_width = 250
+        panel_height = 170
+        panel = pygame.Surface((panel_width, panel_height))
+        panel.set_alpha(200)
+        panel.fill(Config.BLACK)
+        self.screen.blit(panel, (10, 10))
+        
+        # Borde del panel
+        pygame.draw.rect(self.screen, Config.WHITE, (10, 10, panel_width, panel_height), 2)
+        
+        # Salud del jugador con icono
         health_text = font.render(f"Health: {self.player.health}", True, Config.WHITE)
-        self.screen.blit(health_text, (10, 10))
+        self.screen.blit(health_text, (20, 20))
         
         # Puntuación
-        score_text = font.render(f"Score: {self.score}", True, Config.WHITE)
-        self.screen.blit(score_text, (10, 50))
+        score_text = font.render(f"Score: {self.score}", True, Config.YELLOW)
+        self.screen.blit(score_text, (20, 60))
         
         # Wave actual
         wave_text = font.render(f"Wave: {self.wave}", True, Config.WHITE)
-        self.screen.blit(wave_text, (10, 90))
+        self.screen.blit(wave_text, (20, 100))
         
         # Enemigos eliminados
         kills_text = font.render(f"Kills: {self.enemies_killed}", True, Config.WHITE)
-        self.screen.blit(kills_text, (10, 130))
+        self.screen.blit(kills_text, (20, 140))
         
-        # Barra de salud visual
+        # Barra de salud visual mejorada
         health_bar_width = 200
-        health_bar_height = 20
-        health_percentage = self.player.health / Config.PLAYER_HEALTH
+        health_bar_height = 25
+        health_percentage = max(0, self.player.health / Config.PLAYER_HEALTH)
+        
+        # Posición de la barra de salud
+        bar_x = Config.SCREEN_WIDTH - health_bar_width - 20
+        bar_y = 20
         
         # Fondo de la barra de salud
-        health_bar_bg = pygame.Rect(Config.SCREEN_WIDTH - health_bar_width - 10, 10, 
-                                   health_bar_width, health_bar_height)
-        pygame.draw.rect(self.screen, Config.RED, health_bar_bg)
+        health_bar_bg = pygame.Rect(bar_x, bar_y, health_bar_width, health_bar_height)
+        pygame.draw.rect(self.screen, (50, 0, 0), health_bar_bg)
+        pygame.draw.rect(self.screen, Config.WHITE, health_bar_bg, 2)
         
-        # Barra de salud actual
-        health_bar_fg = pygame.Rect(Config.SCREEN_WIDTH - health_bar_width - 10, 10,
-                                   health_bar_width * health_percentage, health_bar_height)
-        pygame.draw.rect(self.screen, Config.GREEN, health_bar_fg)
+        # Barra de salud actual con gradiente de color
+        if health_percentage > 0:
+            health_color = Config.GREEN if health_percentage > 0.5 else Config.YELLOW if health_percentage > 0.25 else Config.RED
+            health_bar_fg = pygame.Rect(bar_x + 2, bar_y + 2,
+                                       int((health_bar_width - 4) * health_percentage), health_bar_height - 4)
+            pygame.draw.rect(self.screen, health_color, health_bar_fg)
+        
+        # Texto de porcentaje de salud
+        health_percent_text = font_small.render(f"{int(health_percentage * 100)}%", True, Config.WHITE)
+        health_percent_rect = health_percent_text.get_rect(center=(bar_x + health_bar_width // 2, bar_y + health_bar_height // 2))
+        self.screen.blit(health_percent_text, health_percent_rect)
     
     def show_game_over(self):
         """
-        Muestra la pantalla de game over y maneja la entrada
+        Muestra la pantalla de game over mejorada
         """
+        # Fondo oscuro con transparencia
         overlay = pygame.Surface((Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
-        overlay.set_alpha(128)
+        overlay.set_alpha(200)
         overlay.fill(Config.BLACK)
         self.screen.blit(overlay, (0, 0))
         
@@ -314,31 +410,46 @@ class Game:
         font_medium = pygame.font.Font(None, 48)
         font_small = pygame.font.Font(None, 36)
         
+        # Panel central
+        panel_width = 600
+        panel_height = 400
+        panel_x = (Config.SCREEN_WIDTH - panel_width) // 2
+        panel_y = (Config.SCREEN_HEIGHT - panel_height) // 2
+        
+        # Dibujar panel
+        panel = pygame.Surface((panel_width, panel_height))
+        panel.set_alpha(240)
+        panel.fill((20, 20, 20))
+        self.screen.blit(panel, (panel_x, panel_y))
+        pygame.draw.rect(self.screen, Config.RED, (panel_x, panel_y, panel_width, panel_height), 3)
+        
         # Texto de Game Over
         game_over_text = font_large.render("GAME OVER", True, Config.RED)
-        game_over_rect = game_over_text.get_rect(center=(Config.SCREEN_WIDTH//2, 200))
+        game_over_rect = game_over_text.get_rect(center=(Config.SCREEN_WIDTH//2, panel_y + 60))
         self.screen.blit(game_over_text, game_over_rect)
         
         # Estadísticas finales
-        final_score_text = font_medium.render(f"Final Score: {self.score}", True, Config.WHITE)
-        final_score_rect = final_score_text.get_rect(center=(Config.SCREEN_WIDTH//2, 300))
+        stats_y = panel_y + 150
+        final_score_text = font_medium.render(f"Final Score: {self.score}", True, Config.YELLOW)
+        final_score_rect = final_score_text.get_rect(center=(Config.SCREEN_WIDTH//2, stats_y))
         self.screen.blit(final_score_text, final_score_rect)
         
         kills_text = font_medium.render(f"Enemies Killed: {self.enemies_killed}", True, Config.WHITE)
-        kills_rect = kills_text.get_rect(center=(Config.SCREEN_WIDTH//2, 350))
+        kills_rect = kills_text.get_rect(center=(Config.SCREEN_WIDTH//2, stats_y + 50))
         self.screen.blit(kills_text, kills_rect)
         
         wave_text = font_medium.render(f"Wave Reached: {self.wave}", True, Config.WHITE)
-        wave_rect = wave_text.get_rect(center=(Config.SCREEN_WIDTH//2, 400))
+        wave_rect = wave_text.get_rect(center=(Config.SCREEN_WIDTH//2, stats_y + 100))
         self.screen.blit(wave_text, wave_rect)
         
         # Opciones
+        options_y = panel_y + panel_height - 80
         restart_text = font_small.render("Press R to Restart", True, Config.YELLOW)
-        restart_rect = restart_text.get_rect(center=(Config.SCREEN_WIDTH//2, 500))
+        restart_rect = restart_text.get_rect(center=(Config.SCREEN_WIDTH//2 - 120, options_y))
         self.screen.blit(restart_text, restart_rect)
         
         menu_text = font_small.render("Press M for Main Menu", True, Config.YELLOW)
-        menu_rect = menu_text.get_rect(center=(Config.SCREEN_WIDTH//2, 540))
+        menu_rect = menu_text.get_rect(center=(Config.SCREEN_WIDTH//2 + 120, options_y))
         self.screen.blit(menu_text, menu_rect)
         
         # Manejar entrada
