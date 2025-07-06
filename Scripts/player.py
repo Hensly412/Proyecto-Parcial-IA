@@ -1,4 +1,4 @@
-# Clase del jugador - HV Warriors
+# Clase del jugador - HV Warriors (COMPLETAMENTE SIN SKINS)
 # Autor: Hensly Manuel Vidal Rosario
 # Matrícula: 23-MISN-2-007
 
@@ -9,7 +9,7 @@ from scripts.bullet import Bullet
 
 class Player:
     """
-    Clase que representa al jugador
+    Clase que representa al jugador - SIN SISTEMA DE SKINS
     """
     
     def __init__(self, x, y, sprite_manager=None):
@@ -42,57 +42,22 @@ class Player:
     
     def load_sprite(self):
         """
-        Carga el sprite del jugador
+        Carga el sprite básico del jugador - SPRITE FIJO AZUL
         """
-        # Usar skin manager si está disponible
-        if self.skin_manager:
-            # Actualizar current_skin_name ANTES de cargar
-            self.current_skin_name = self.skin_manager.current_player_skin
-            
-            new_sprite = self.skin_manager.get_player_skin()
-            if new_sprite:
-                self.sprite = new_sprite
-                print(f"🎨 Sprite cargado desde SkinManager: {self.skin_manager.current_player_skin}")
-            else:
-                print("❌ SkinManager no devolvió sprite")
-                self.create_fallback_sprite()
-        else:
-            print("❌ No hay SkinManager disponible")
-            self.create_fallback_sprite()
-    
-    def create_fallback_sprite(self):
-        """
-        Crea sprite básico de respaldo
-        """
+        # Crear sprite básico fijo - azul con detalles
         self.sprite = pygame.Surface((Config.PLAYER_SIZE, Config.PLAYER_SIZE))
-        self.sprite.fill(Config.BLUE)
+        self.sprite.fill(Config.BLUE)  # Azul
         
         # Agregar detalles al sprite
         pygame.draw.circle(self.sprite, Config.WHITE, 
-                         (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 4)
+                         (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 4)  # Cabeza blanca
         pygame.draw.rect(self.sprite, Config.YELLOW,
-                        (Config.PLAYER_SIZE//2 - 2, Config.PLAYER_SIZE//2, 4, 8))
-        print("🎨 Sprite de respaldo creado")
-    
-    def update_skin(self):
-        """
-        Actualiza la skin del jugador (recarga el sprite)
-        """
-        self.load_sprite()
+                        (Config.PLAYER_SIZE//2 - 2, Config.PLAYER_SIZE//2, 4, 8))  # Arma amarilla
     
     def update(self, dt):
         """
         Actualiza el estado del jugador
         """
-        # Verificar cambios de skin (DETECCIÓN MEJORADA)
-        if self.skin_manager:
-            current_skin_name = self.skin_manager.current_player_skin
-            if current_skin_name != self.current_skin_name:
-                print(f"🎨 CAMBIANDO SKIN EN PLAYER: {self.current_skin_name} → {current_skin_name}")
-                self.current_skin_name = current_skin_name
-                self.load_sprite()
-                print(f"🎨 Sprite actualizado para skin: {current_skin_name}")
-        
         # Actualizar cooldown de disparo
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= dt
@@ -196,17 +161,6 @@ class Player:
         """
         Renderiza al jugador en la pantalla
         """
-        # VERIFICACIÓN AGRESIVA: Comprobar skin antes de cada render
-        if self.skin_manager:
-            current_skin_name = self.skin_manager.current_player_skin
-            if current_skin_name != self.current_skin_name:
-                print(f"🔄 RENDER: Detectado cambio de skin {self.current_skin_name} → {current_skin_name}")
-                self.current_skin_name = current_skin_name
-                new_sprite = self.skin_manager.get_player_skin()
-                if new_sprite:
-                    self.sprite = new_sprite
-                    print(f"✅ RENDER: Sprite actualizado a {current_skin_name}")
-        
         # Rotar sprite según la dirección
         if self.sprite:
             rotated_sprite = pygame.transform.rotate(self.sprite, -self.facing_direction * 90)
@@ -216,7 +170,7 @@ class Player:
             
             screen.blit(rotated_sprite, sprite_rect)
         else:
-            # Fallback: dibujar rectángulo
+            # Fallback: dibujar rectángulo azul
             pygame.draw.rect(screen, Config.BLUE, self.rect)
         
         # Renderizar indicador de salud si está herido

@@ -60,18 +60,9 @@ class Game:
     
     def debug_skins(self):
         """
-        Debug de skins en el juego
+        Método de debug eliminado (ya no hay skins)
         """
-        print(f"🔍 DEBUG GAME SKINS:")
-        print(f"   SkinManager current: {self.skin_manager.current_player_skin}")
-        print(f"   Player current_skin_name: {self.player.current_skin_name}")
-        print(f"   Player sprite: {self.player.sprite}")
-        if self.player.sprite:
-            try:
-                center_color = self.player.sprite.get_at((16, 16))
-                print(f"   Player sprite center color: {center_color}")
-            except:
-                print(f"   No se pudo obtener color del sprite")
+        pass
     
     def handle_event(self, event):
         """
