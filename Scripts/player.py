@@ -59,6 +59,12 @@ class Player:
             pygame.draw.rect(self.sprite, Config.YELLOW,
                             (Config.PLAYER_SIZE//2 - 2, Config.PLAYER_SIZE//2, 4, 8))
     
+    def update_skin(self):
+        """
+        Actualiza la skin del jugador (recarga el sprite)
+        """
+        self.load_sprite()
+    
     def update(self, dt):
         """
         Actualiza el estado del jugador

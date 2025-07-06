@@ -40,6 +40,7 @@ class SkinMenu:
                 # Seleccionar skin
                 selected_skin = self.available_skins[self.selected_skin_index]
                 self.skin_manager.set_player_skin(selected_skin)
+                print(f"🎨 Skin cambiada a: {selected_skin}")
                 return "SELECTED"
             elif event.key == pygame.K_ESCAPE:
                 return "BACK"
@@ -49,6 +50,7 @@ class SkinMenu:
                 if event.button == 0:  # Botón A
                     selected_skin = self.available_skins[self.selected_skin_index]
                     self.skin_manager.set_player_skin(selected_skin)
+                    print(f"🎨 Skin cambiada a: {selected_skin}")
                     return "SELECTED"
                 elif event.button == 1:  # Botón B
                     return "BACK"

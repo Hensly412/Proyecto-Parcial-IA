@@ -59,6 +59,10 @@ def main():
             elif game_state == "SKINS":
                 action = skin_menu.handle_event(event)
                 if action == "SELECTED":
+                    # Actualizar skin del jugador si está en juego
+                    if game and hasattr(game, 'player') and hasattr(game.player, 'update_skin'):
+                        game.player.update_skin()
+                        print("🎨 Skin del jugador actualizada en el juego")
                     game_state = "MENU"
                 elif action == "BACK":
                     game_state = "MENU"
