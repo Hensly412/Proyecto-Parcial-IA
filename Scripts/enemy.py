@@ -353,10 +353,10 @@ class Enemy:
         if self.health < self.max_health:
             self.render_health_bar(screen)
         
-        # Debug: mostrar path si está activo
-        if self.path and len(self.path) > 1:
-            for i in range(len(self.path) - 1):
-                pygame.draw.line(screen, Config.YELLOW, self.path[i], self.path[i+1], 2)
+        # Debug: mostrar path si está activo (opcional)
+        # if self.path and len(self.path) > 1:
+        #     for i in range(len(self.path) - 1):
+        #         pygame.draw.line(screen, Config.YELLOW, self.path[i], self.path[i+1], 2)
     
     def render_health_bar(self, screen):
         """
