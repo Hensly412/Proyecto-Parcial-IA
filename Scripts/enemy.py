@@ -15,11 +15,52 @@ class Enemy:
     Clase que representa un enemigo con IA avanzada
     """
     
-    def __init__(self, x, y, sprite_manager):
+    def __init__(self, x, y, sprite_manager, skin_manager=None):
         self.x = x
         self.y = y
         self.sprite_manager = sprite_manager
+        self.skin_manager = skin_manager
         self.rect = pygame.Rect(x, y, Config.ENEMY_SIZE, Config.ENEMY_SIZE)
+        
+        # Estadísticas
+        self.health = Config.ENEMY_HEALTH
+        self.max_health = Config.ENEMY_HEALTH
+        self.speed = Config.ENEMY_SPEED
+        
+        # IA y comportamiento
+        self.target_pos = None
+        self.state = "PATROL"  # PATROL, CHASE, ATTACK, RETREAT
+        self.behavior_tree = self.create_behavior_tree()
+        self.behavior_timer = 0
+        
+        # Pathfinding A*
+        self.astar = AStar()
+        self.path = []
+        self.current_path_index = 0
+        self.pathfinding_timer = 0
+        
+        # Sistema de disparo
+        self.shoot_cooldown = 0
+        self.shoot_delay = 1.5  # Segundos entre disparos
+        self.last_shot_time = 0
+        
+        # Detección del jugador
+        self.sight_range = Config.ENEMY_SIGHT_RANGE
+        self.attack_range = Config.ENEMY_ATTACK_RANGE
+        self.player_detected = False
+        self.last_player_pos = None
+        
+        # Patrullaje
+        self.patrol_points = self.generate_patrol_points()
+        self.current_patrol_index = 0
+        
+        # Sprites y animación
+        self.sprite = None
+        self.facing_direction = 0  # 0=Norte, 1=Este, 2=Sur, 3=Oeste
+        self.animation_frame = 0
+        self.animation_timer = 0
+        
+        self.load_sprite()
         
         # Estadísticas
         self.health = Config.ENEMY_HEALTH

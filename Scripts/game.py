@@ -190,8 +190,21 @@ class Game:
             x = -Config.ENEMY_SIZE
             y = random.randint(0, Config.SCREEN_HEIGHT)
         
-        enemy = Enemy(x, y, self.sprite_manager, self.skin_manager)
-        self.enemies.append(enemy)
+        # Crear enemigo con manejo de errores
+        try:
+            enemy = Enemy(x, y, self.sprite_manager, self.skin_manager)
+            self.enemies.append(enemy)
+        except TypeError as e:
+            print(f"Error creando enemigo con skin_manager: {e}")
+            # Fallback: crear sin skin_manager
+            try:
+                enemy = Enemy(x, y, self.sprite_manager)
+                self.enemies.append(enemy)
+            except Exception as e2:
+                print(f"Error creando enemigo básico: {e2}")
+                # Crear enemigo mínimo
+                enemy = Enemy(x, y)
+                self.enemies.append(enemy)
     
     def check_collisions(self):
         """
