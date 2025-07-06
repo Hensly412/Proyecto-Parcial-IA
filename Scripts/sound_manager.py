@@ -100,6 +100,123 @@ class SoundManager:
             # Crear sonido silencioso como fallback
             return pygame.mixer.Sound(buffer=b'\x00' * 1000)
     
+    def detect_file_format(self, filepath):
+        """
+        Detecta el formato real de un archivo de audio
+        """
+        try:
+            with open(filepath, 'rb') as f:
+                header = f.read(12)
+                
+            # Detectar formato por header
+            if header.startswith(b'ID3') or header[6:10] == b'ftyp':
+                return 'mp3'
+            elif header.startswith(b'OggS'):
+                return 'ogg'
+            elif header.startswith(b'RIFF') and header[8:12] == b'WAVE':
+                return 'wav'
+            else:
+                # Fallback: usar extensión del archivo
+                return filepath.split('.')[-1].lower()
+                
+        except Exception:
+            return filepath.split('.')[-1].lower()
+    
+    def try_load_music(self, filepath):
+        """
+        Intenta cargar música detectando automáticamente el formato
+        """
+        if not os.path.exists(filepath):
+            return False
+            
+        try:
+            # Detectar formato real
+            real_format = self.detect_file_format(filepath)
+            print(f"🔍 Archivo: {os.path.basename(filepath)} - Formato detectado: {real_format}")
+            
+            # Intentar cargar
+            pygame.mixer.music.load(filepath)
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error cargando {filepath}: {e}")
+            return False
+    
+    def play_menu_music(self):
+        """
+        Reproduce música del menú
+        """
+        if self.current_music_type == "menu":
+            return  # Ya está reproduciendo música del menú
+        
+        # Buscar archivos de música del menú
+        menu_files = [
+            "assets/music/menu_theme.mp3",
+            "assets/music/menu_theme.wav", 
+            "assets/music/menu_theme.ogg",
+            "assets/music/menu.mp3",
+            "assets/music/menu.wav",
+            "assets/music/menu.ogg"
+        ]
+        
+        for path in menu_files:
+            if os.path.exists(path):
+                if self.try_load_music(path):
+                    try:
+                        pygame.mixer.music.play(-1)  # Loop infinito
+                        self.music_playing = True
+                        self.current_music_type = "menu"
+                        print(f"🎵 Música del menú cargada: {os.path.basename(path)}")
+                        return
+                    except Exception as e:
+                        print(f"❌ Error reproduciendo {path}: {e}")
+                        continue
+        
+        print("⚠️ No se pudo cargar música del menú")
+        self.current_music_type = "menu"
+    
+    def play_game_music(self):
+        """
+        Reproduce música del juego
+        """
+        if self.current_music_type == "game":
+            return  # Ya está reproduciendo música del juego
+        
+        # Buscar archivos de música del juego
+        game_files = [
+            "assets/music/game_theme.mp3",
+            "assets/music/game_theme.wav",
+            "assets/music/game_theme.ogg", 
+            "assets/music/battle.mp3",
+            "assets/music/battle.wav",
+            "assets/music/battle.ogg",
+            "assets/music/game.mp3",
+            "assets/music/game.wav",
+            "assets/music/game.ogg"
+        ]
+        
+        for path in game_files:
+            if os.path.exists(path):
+                if self.try_load_music(path):
+                    try:
+                        pygame.mixer.music.play(-1)  # Loop infinito
+                        self.music_playing = True
+                        self.current_music_type = "game"
+                        print(f"🎵 Música del juego cargada: {os.path.basename(path)}")
+                        return
+                    except Exception as e:
+                        print(f"❌ Error reproduciendo {path}: {e}")
+                        continue
+        
+        print("⚠️ No se pudo cargar música del juego")
+        self.current_music_type = "game"
+    
+    def get_current_music_type(self):
+        """
+        Obtiene el tipo de música actual
+        """
+        return self.current_music_type or "Sin música"
+    
     def play_sound(self, sound_name):
         """
         Reproduce un sonido
@@ -109,54 +226,6 @@ class SoundManager:
                 self.sounds[sound_name].play()
             except Exception as e:
                 print(f"Error reproduciendo sonido {sound_name}: {e}")
-    
-    def play_menu_music(self):
-        """
-        Reproduce música del menú
-        """
-        if self.current_music_type == "menu":
-            return  # Ya está reproduciendo música del menú
-        
-        try:
-            menu_music_path = "assets/music/menu_theme.mp3"
-            if os.path.exists(menu_music_path):
-                pygame.mixer.music.load(menu_music_path)
-                pygame.mixer.music.play(-1)  # Loop infinito
-                self.music_playing = True
-                self.current_music_type = "menu"
-                print("Reproduciendo música del menú")
-            else:
-                print("No se encontró música del menú (menu_theme.mp3)")
-                self.current_music_type = "menu"
-        except Exception as e:
-            print(f"Error cargando música del menú: {e}")
-    
-    def play_game_music(self):
-        """
-        Reproduce música del juego
-        """
-        if self.current_music_type == "game":
-            return  # Ya está reproduciendo música del juego
-        
-        try:
-            game_music_path = "assets/music/game_theme.mp3"
-            if os.path.exists(game_music_path):
-                pygame.mixer.music.load(game_music_path)
-                pygame.mixer.music.play(-1)  # Loop infinito
-                self.music_playing = True
-                self.current_music_type = "game"
-                print("Reproduciendo música del juego")
-            else:
-                print("No se encontró música del juego (game_theme.mp3)")
-                self.current_music_type = "game"
-        except Exception as e:
-            print(f"Error cargando música del juego: {e}")
-    
-    def get_current_music_type(self):
-        """
-        Obtiene el tipo de música actual
-        """
-        return self.current_music_type or "Sin música"
     
     def stop_music(self):
         """

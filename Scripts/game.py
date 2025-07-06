@@ -53,8 +53,8 @@ class Game:
             self.gamepad = pygame.joystick.Joystick(0)
             self.gamepad.init()
         
-        # Reproducir música de fondo
-        self.sound_manager.play_music()
+        # Reproducir música del juego
+        self.sound_manager.play_game_music()
     
     def handle_event(self, event):
         """
@@ -271,15 +271,10 @@ class Game:
         kills_text = font.render(f"Kills: {self.enemies_killed}", True, Config.WHITE)
         self.screen.blit(kills_text, (10, 130))
         
-        # Información de música
-        current_track = self.sound_manager.get_current_track_name()
-        music_text = font.render(f"Música: {current_track}", True, Config.WHITE)
-        self.screen.blit(music_text, (10, 170))
-        
         # Skin actual
         current_skin = self.skin_manager.current_player_skin
         skin_text = font.render(f"Skin: {current_skin}", True, Config.WHITE)
-        self.screen.blit(skin_text, (10, 210))
+        self.screen.blit(skin_text, (10, 170))
         
         # Barra de salud visual
         health_bar_width = 200
