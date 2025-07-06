@@ -61,13 +61,13 @@ def main():
                 if action == "SELECTED":
                     print(f"🎨 MAIN: Skin seleccionada en menú")
                     # Actualizar skin del jugador si está en juego
-                    if game and hasattr(game, 'player') and hasattr(game.player, 'skin_manager'):
-                        if game.player.skin_manager:
-                            # Forzar actualización inmediata
-                            game.player.current_skin_name = None  # Forzar detección de cambio
-                            new_skin = game.player.skin_manager.current_player_skin
-                            print(f"🎨 MAIN: Forzando actualización a skin: {new_skin}")
-                            game.player.load_sprite()
+                    if game and hasattr(game, 'player'):
+                        print(f"🎨 MAIN: Forzando actualización del jugador existente")
+                        # Resetear el seguimiento de skin para forzar detección
+                        game.player.current_skin_name = None
+                        # Forzar recarga inmediata
+                        game.player.load_sprite()
+                        print(f"🎨 MAIN: Player actualizado a skin {game.player.skin_manager.current_player_skin}")
                     game_state = "MENU"
                 elif action == "BACK":
                     game_state = "MENU"
