@@ -10,9 +10,10 @@ class Menu:
     Clase del menú principal
     """
     
-    def __init__(self, screen, skin_manager=None):
+    def __init__(self, screen, skin_manager=None, sound_manager=None):
         self.screen = screen
         self.skin_manager = skin_manager
+        self.sound_manager = sound_manager
         self.selected_option = 0
         self.options = ["Start Game", "Select Skin", "Quit"]
         
@@ -25,19 +26,11 @@ class Menu:
         self.gamepad = None
         if pygame.joystick.get_count() > 0:
             self.gamepad = pygame.joystick.Joystick(0)
-            self.gamepad.init()selected_option = 0
-        self.options = ["Start Game", "Quit"]
-        
-        # Fuentes
-        self.title_font = pygame.font.Font(None, 72)
-        self.option_font = pygame.font.Font(None, 48)
-        self.info_font = pygame.font.Font(None, 24)
-        
-        # Gamepad
-        self.gamepad = None
-        if pygame.joystick.get_count() > 0:
-            self.gamepad = pygame.joystick.Joystick(0)
             self.gamepad.init()
+        
+        # Reproducir música del menú
+        if self.sound_manager:
+            self.sound_manager.play_menu_music()
     
     def handle_event(self, event):
         """
@@ -106,7 +99,7 @@ class Menu:
             self.screen.blit(option_text, option_rect)
         
         # Controles
-        controls_y = Config.SCREEN_HEIGHT - 120
+        controls_y = Config.SCREEN_HEIGHT - 160
         controls = [
             "Controles:",
             "WASD/Flechas - Mover",

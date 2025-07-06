@@ -1,4 +1,4 @@
-# HV Warriors - Proyecto IA
+# HV Warriors - Proyecto Final IA
 # Autor: Hensly Manuel Vidal Rosario
 # Matrícula: 23-MISN-2-007
 # Inspirado en Ikari Warriors
@@ -8,6 +8,8 @@ import sys
 import os
 from scripts.game import Game
 from scripts.menu import Menu
+from scripts.skin_menu import SkinMenu
+from scripts.skin_manager import SkinManager
 from scripts.config import Config
 
 def main():
@@ -23,12 +25,14 @@ def main():
     pygame.display.set_caption("HV Warriors")
     clock = pygame.time.Clock()
     
-    # Inicializar el menú
-    menu = Menu(screen)
+    # Inicializar sistemas
+    skin_manager = SkinManager()
+    menu = Menu(screen, skin_manager)
+    skin_menu = SkinMenu(screen, skin_manager)
     game = None
     
     # Estados del juego
-    game_state = "MENU"  # MENU, PLAYING, GAME_OVER
+    game_state = "MENU"  # MENU, SKINS, PLAYING, GAME_OVER
     
     running = True
     while running:
@@ -45,8 +49,17 @@ def main():
                 if action == "START":
                     game = Game(screen)
                     game_state = "PLAYING"
+                elif action == "SKINS":
+                    game_state = "SKINS"
                 elif action == "QUIT":
                     running = False
+            
+            elif game_state == "SKINS":
+                action = skin_menu.handle_event(event)
+                if action == "SELECTED":
+                    game_state = "MENU"
+                elif action == "BACK":
+                    game_state = "MENU"
             
             elif game_state == "PLAYING":
                 if game:
@@ -60,6 +73,10 @@ def main():
         if game_state == "MENU":
             menu.update(dt)
             menu.render()
+        
+        elif game_state == "SKINS":
+            skin_menu.update(dt)
+            skin_menu.render()
         
         elif game_state == "PLAYING":
             if game:
