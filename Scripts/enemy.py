@@ -7,7 +7,7 @@ import math
 import random
 from scripts.config import Config
 from scripts.bullet import Bullet
-from scripts.behavior_tree import BehaviorTree, Selector, Sequence, Leaf
+from scripts.behavior_tree import BehaviorTree, Selector, Sequence, Leaf, Condition
 from scripts.astar import AStar
 
 class Enemy:
