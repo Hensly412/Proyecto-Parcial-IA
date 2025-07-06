@@ -12,15 +12,11 @@ class Player:
     Clase que representa al jugador
     """
     
-    def __init__(self, x, y, sprite_manager, skin_manager=None):
+    def __init__(self, x, y, sprite_manager=None):
         self.x = x
         self.y = y
         self.sprite_manager = sprite_manager
-        self.skin_manager = skin_manager
         self.rect = pygame.Rect(x, y, Config.PLAYER_SIZE, Config.PLAYER_SIZE)
-        
-        # Rastrear skin actual para detectar cambios
-        self.current_skin_name = None
         
         # Estadísticas
         self.health = Config.PLAYER_HEALTH

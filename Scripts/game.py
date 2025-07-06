@@ -12,7 +12,6 @@ from scripts.bullet import Bullet
 from scripts.game_map import GameMap
 from scripts.sound_manager import SoundManager
 from scripts.sprite_manager import SpriteManager
-from scripts.skin_manager import SkinManager
 
 class Game:
     """
@@ -30,13 +29,16 @@ class Game:
         # Inicializar componentes
         self.sound_manager = SoundManager()
         self.sprite_manager = SpriteManager()
-        self.skin_manager = SkinManager()
         self.game_map = GameMap()
+        
+        print(f"🎮 Game: Componentes inicializados")
         
         # Crear jugador
         start_x = Config.SCREEN_WIDTH // 2
         start_y = Config.SCREEN_HEIGHT - 100
-        self.player = Player(start_x, start_y, self.sprite_manager, self.skin_manager)
+        self.player = Player(start_x, start_y, self.sprite_manager)
+        
+        print(f"🎮 Game: Player creado")
         
         # Listas de entidades
         self.enemies = []
@@ -55,6 +57,21 @@ class Game:
         
         # Reproducir música del juego
         self.sound_manager.play_game_music()
+    
+    def debug_skins(self):
+        """
+        Debug de skins en el juego
+        """
+        print(f"🔍 DEBUG GAME SKINS:")
+        print(f"   SkinManager current: {self.skin_manager.current_player_skin}")
+        print(f"   Player current_skin_name: {self.player.current_skin_name}")
+        print(f"   Player sprite: {self.player.sprite}")
+        if self.player.sprite:
+            try:
+                center_color = self.player.sprite.get_at((16, 16))
+                print(f"   Player sprite center color: {center_color}")
+            except:
+                print(f"   No se pudo obtener color del sprite")
     
     def handle_event(self, event):
         """
@@ -190,21 +207,15 @@ class Game:
             x = -Config.ENEMY_SIZE
             y = random.randint(0, Config.SCREEN_HEIGHT)
         
-        # Crear enemigo con manejo de errores
+        # Crear enemigo básico
         try:
-            enemy = Enemy(x, y, self.sprite_manager, self.skin_manager)
+            enemy = Enemy(x, y, self.sprite_manager)
             self.enemies.append(enemy)
-        except TypeError as e:
-            print(f"Error creando enemigo con skin_manager: {e}")
-            # Fallback: crear sin skin_manager
-            try:
-                enemy = Enemy(x, y, self.sprite_manager)
-                self.enemies.append(enemy)
-            except Exception as e2:
-                print(f"Error creando enemigo básico: {e2}")
-                # Crear enemigo mínimo
-                enemy = Enemy(x, y)
-                self.enemies.append(enemy)
+        except Exception as e:
+            print(f"Error creando enemigo: {e}")
+            # Crear enemigo mínimo de respaldo
+            enemy = Enemy(x, y)
+            self.enemies.append(enemy)
     
     def check_collisions(self):
         """
@@ -283,11 +294,6 @@ class Game:
         # Enemigos eliminados
         kills_text = font.render(f"Kills: {self.enemies_killed}", True, Config.WHITE)
         self.screen.blit(kills_text, (10, 130))
-        
-        # Skin actual
-        current_skin = self.skin_manager.current_player_skin
-        skin_text = font.render(f"Skin: {current_skin}", True, Config.WHITE)
-        self.screen.blit(skin_text, (10, 170))
         
         # Barra de salud visual
         health_bar_width = 200

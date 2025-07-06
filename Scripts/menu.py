@@ -1,4 +1,4 @@
-# Menú principal - HV Warriors
+# Menú principal - HV Warriors (SIN SKINS)
 # Autor: Hensly Manuel Vidal Rosario
 # Matrícula: 23-MISN-2-007
 
@@ -12,10 +12,9 @@ class Menu:
     
     def __init__(self, screen, skin_manager=None, sound_manager=None):
         self.screen = screen
-        self.skin_manager = skin_manager
         self.sound_manager = sound_manager
         self.selected_option = 0
-        self.options = ["Start Game", "Select Skin", "Quit"]
+        self.options = ["Start Game", "Quit"]  # Solo 2 opciones
         
         # Fuentes
         self.title_font = pygame.font.Font(None, 72)
@@ -31,8 +30,6 @@ class Menu:
         # Reproducir música del menú (con verificación)
         if self.sound_manager and hasattr(self.sound_manager, 'play_menu_music'):
             self.sound_manager.play_menu_music()
-        elif self.sound_manager:
-            print("⚠️ SoundManager no tiene método play_menu_music()")
     
     def handle_event(self, event):
         """
@@ -47,8 +44,6 @@ class Menu:
                 if self.selected_option == 0:
                     return "START"
                 elif self.selected_option == 1:
-                    return "SKINS"
-                elif self.selected_option == 2:
                     return "QUIT"
         
         elif event.type == pygame.JOYBUTTONDOWN:
@@ -57,8 +52,6 @@ class Menu:
                     if self.selected_option == 0:
                         return "START"
                     elif self.selected_option == 1:
-                        return "SKINS"
-                    elif self.selected_option == 2:
                         return "QUIT"
         
         elif event.type == pygame.JOYHATMOTION:
