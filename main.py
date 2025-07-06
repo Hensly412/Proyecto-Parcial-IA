@@ -10,6 +10,7 @@ from scripts.game import Game
 from scripts.menu import Menu
 from scripts.skin_menu import SkinMenu
 from scripts.skin_manager import SkinManager
+from scripts.sound_manager import SoundManager
 from scripts.config import Config
 
 def main():
@@ -27,7 +28,8 @@ def main():
     
     # Inicializar sistemas
     skin_manager = SkinManager()
-    menu = Menu(screen, skin_manager)
+    sound_manager = SoundManager()
+    menu = Menu(screen, skin_manager, sound_manager)
     skin_menu = SkinMenu(screen, skin_manager)
     game = None
     
