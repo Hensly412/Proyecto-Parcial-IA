@@ -100,47 +100,15 @@ class SoundManager:
             # Crear sonido silencioso como fallback
             return pygame.mixer.Sound(buffer=b'\x00' * 1000)
     
-    def detect_file_format(self, filepath):
+    def play_sound(self, sound_name):
         """
-        Detecta el formato real de un archivo de audio
+        Reproduce un sonido
         """
-        try:
-            with open(filepath, 'rb') as f:
-                header = f.read(12)
-                
-            # Detectar formato por header
-            if header.startswith(b'ID3') or header[6:10] == b'ftyp':
-                return 'mp3'
-            elif header.startswith(b'OggS'):
-                return 'ogg'
-            elif header.startswith(b'RIFF') and header[8:12] == b'WAVE':
-                return 'wav'
-            else:
-                # Fallback: usar extensión del archivo
-                return filepath.split('.')[-1].lower()
-                
-        except Exception:
-            return filepath.split('.')[-1].lower()
-    
-    def try_load_music(self, filepath):
-        """
-        Intenta cargar música detectando automáticamente el formato
-        """
-        if not os.path.exists(filepath):
-            return False
-            
-        try:
-            # Detectar formato real
-            real_format = self.detect_file_format(filepath)
-            print(f"🔍 Archivo: {os.path.basename(filepath)} - Formato detectado: {real_format}")
-            
-            # Intentar cargar
-            pygame.mixer.music.load(filepath)
-            return True
-            
-        except Exception as e:
-            print(f"❌ Error cargando {filepath}: {e}")
-            return False
+        if sound_name in self.sounds:
+            try:
+                self.sounds[sound_name].play()
+            except Exception as e:
+                print(f"Error reproduciendo sonido {sound_name}: {e}")
     
     def play_menu_music(self):
         """
@@ -217,15 +185,47 @@ class SoundManager:
         """
         return self.current_music_type or "Sin música"
     
-    def play_sound(self, sound_name):
+    def detect_file_format(self, filepath):
         """
-        Reproduce un sonido
+        Detecta el formato real de un archivo de audio
         """
-        if sound_name in self.sounds:
-            try:
-                self.sounds[sound_name].play()
-            except Exception as e:
-                print(f"Error reproduciendo sonido {sound_name}: {e}")
+        try:
+            with open(filepath, 'rb') as f:
+                header = f.read(12)
+                
+            # Detectar formato por header
+            if header.startswith(b'ID3') or header[6:10] == b'ftyp':
+                return 'mp3'
+            elif header.startswith(b'OggS'):
+                return 'ogg'
+            elif header.startswith(b'RIFF') and header[8:12] == b'WAVE':
+                return 'wav'
+            else:
+                # Fallback: usar extensión del archivo
+                return filepath.split('.')[-1].lower()
+                
+        except Exception:
+            return filepath.split('.')[-1].lower()
+    
+    def try_load_music(self, filepath):
+        """
+        Intenta cargar música detectando automáticamente el formato
+        """
+        if not os.path.exists(filepath):
+            return False
+            
+        try:
+            # Detectar formato real
+            real_format = self.detect_file_format(filepath)
+            print(f"🔍 Archivo: {os.path.basename(filepath)} - Formato detectado: {real_format}")
+            
+            # Intentar cargar
+            pygame.mixer.music.load(filepath)
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error cargando {filepath}: {e}")
+            return False
     
     def stop_music(self):
         """
