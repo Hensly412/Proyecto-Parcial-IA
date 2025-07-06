@@ -12,10 +12,11 @@ class Player:
     Clase que representa al jugador
     """
     
-    def __init__(self, x, y, sprite_manager):
+    def __init__(self, x, y, sprite_manager, skin_manager=None):
         self.x = x
         self.y = y
         self.sprite_manager = sprite_manager
+        self.skin_manager = skin_manager
         self.rect = pygame.Rect(x, y, Config.PLAYER_SIZE, Config.PLAYER_SIZE)
         
         # Estadísticas
@@ -44,15 +45,19 @@ class Player:
         """
         Carga el sprite del jugador
         """
-        # Crear sprite básico si no hay imagen disponible
-        self.sprite = pygame.Surface((Config.PLAYER_SIZE, Config.PLAYER_SIZE))
-        self.sprite.fill(Config.BLUE)
-        
-        # Agregar detalles al sprite
-        pygame.draw.circle(self.sprite, Config.WHITE, 
-                         (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 4)
-        pygame.draw.rect(self.sprite, Config.YELLOW,
-                        (Config.PLAYER_SIZE//2 - 2, Config.PLAYER_SIZE//2, 4, 8))
+        # Usar skin manager si está disponible
+        if self.skin_manager:
+            self.sprite = self.skin_manager.get_player_skin()
+        else:
+            # Crear sprite básico si no hay skin manager
+            self.sprite = pygame.Surface((Config.PLAYER_SIZE, Config.PLAYER_SIZE))
+            self.sprite.fill(Config.BLUE)
+            
+            # Agregar detalles al sprite
+            pygame.draw.circle(self.sprite, Config.WHITE, 
+                             (Config.PLAYER_SIZE//2, Config.PLAYER_SIZE//4), 4)
+            pygame.draw.rect(self.sprite, Config.YELLOW,
+                            (Config.PLAYER_SIZE//2 - 2, Config.PLAYER_SIZE//2, 4, 8))
     
     def update(self, dt):
         """
